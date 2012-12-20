@@ -123,10 +123,19 @@ def f_weather(self, origin, match, args):
        metar[0].endswith('SM')): 
       visibility = metar[0]
       metar = metar[1:]
+   #Fix to handle whole numbers + fractions which are separated by a space
+   #From spec located here: http://www.astro.keele.ac.uk/oldusers/rno/Aviation/metar_codes.html
+   elif (re.match("\d+$", metar[0]) and re.match("\d/\dSM", metar[1])):
+      visibility = metar[0] + " " + metar[1]
+      metar = metar[2:]
    else: visibility = None
 
    while metar[0].startswith('R') and (metar[0].endswith('L') 
                                     or 'L/' in metar[0]): 
+      metar = metar[1:]
+      
+   #Fix for runway visual range format.  I didn't remove the spec above in case it is also valid
+   while metar[0].startswith('R') and metar[0].endswith('FT'):
       metar = metar[1:]
 
    if len(metar[0]) == 6 and (metar[0].endswith('N') or 
